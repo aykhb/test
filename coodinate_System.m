@@ -36,7 +36,7 @@ load matlab.mat
 
   end
  
-  if 1  % for check
+  if 0% for check
     stv_data=cell2mat(D.pt.sd25(1:25));
     lsp=LSP25;
     for iSg=1:nSg
