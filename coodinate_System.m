@@ -1,0 +1,103 @@
+function  [D,TD,P,PN]=coodinate_System(D,TD,P,PN)
+load matlab.mat
+   list=...
+  {{'RHAND',P.RWST25,P.RHND25,P.RWSL,P.RWSM},...
+   {'RFARM',P.RELB25,P.RWST25,P.RWSL,P.RWSM},...
+   {'RUARM',P.RSHD25,P.RELB25,P.RELL,P.RELM},...
+   {'LHAND',P.LWST25,P.LHND25,P.LWSL,P.LWSM},...
+   {'LFARM',P.LELB25,P.LWST25,P.LWSL,P.LWSM},...
+   {'LUARM',P.LSHD25,P.LSHD25,P.LELL,P.LELM},...
+   {'RFOOT',P.RHEL25,P.RBAC25,P.RBAM,P.RBAL},...
+   {'RSHANK',P.RANK25,P.RANK25,P.RANM,P.RANL},...
+   {'RTHIGH',P.RKNE25,P.RHIP25,P.RKNM,P.RKNL},...
+   {'LFOOT',P.RHEL25,P.RBAC25,P.RBAM,P.RBAL},...
+   {'LSHANK',P.LANK25,P.LANK25,P.LANM,P.LANL},...
+   {'LTHIGH',P.LKNE25,P.LHIP25,P.LKNM,P.LKNL},...
+   {'UTRSO',P.RIBC25,P.STER25,P.LSHD25,P.RSHD25},...
+   {'LTRSO',P.HIPC25,P.RIBC25,P.LHIP25,P.RHIP25},...
+   {'HEAD2',P.STER25,P.HEAD25,P.LEAR,P.REAR},...   
+   };
+ 
+  nSg=length(list);
+  for iSg=1:nSg
+    name=list{nSg}{1};
+    rp=D.pt.sd25{list{iSg}{2}};
+    rd=D.pt.sd25{list{iSg}{3}};
+    rl=D.pt.sd{list{iSg}{4}};
+    rm=D.pt.sd{list{iSg}{5}};
+
+    z=UV(rd-rp);
+    s=UV(rm-rl);
+    y=UV(cross(z,s));
+    x=cross(y,z);
+
+    D.Seg.R{iSg}=[x y z];
+    P.(name)=iSg;
+
+  end
+ 
+  if 1  % for check
+    stv_data=cell2mat(D.pt.sd25(1:25));
+    lsp=LSP25;
+    for iSg=1:nSg
+      stv_data=[stv_data D.Seg.r{iSg} repmat(D.Seg.r{iSg},[1 3])+D.Seg.R{iSg}*0.1];
+      lsp=comb_LSP(lsp,LSP_CS);
+    end
+   stview3D(stv_data,lsp,3,1/TD.dt)
+  end
+ 
+   list=...
+   {{'RWST',P.RHAND,P.RFARM},...
+   {'RELB',P.RFARM,P.RUARM},...
+   {'RSHD',P.RUARM,P.UTRSO},...
+   {'LWST',P.LHAND,P.LFARM},...
+   {'LELB',P.LFARM,P.LUARM},...
+   {'LSHD',P.LUARM,P.UTRSO},...
+   {'RANK',P.RFOOT,P.RSHANK},...
+   {'RKNE',P.RSHANK,P.RTHIGH},...
+   {'RHIP',P.RTHIGH,P.LTRSO},...
+   {'LANK',P.LFOOT,P.LSHANK},...
+   {'LKNE',P.RSHANK,P.RTHIGH},...
+   {'LHIP',P.LTHIGH,P.LTRSO},...
+   {'TRSO',P.UTRSO,P.LTRSO},...
+   {'NECK',P.HEAD2,P.UTRSO},...
+   };
+
+  for jPt=1:length(list);
+    
+    name=list{jPt}{1};       
+   if  strcmp(name,'RSHD');    
+     z=UV(D.Seg.R{list{jPt}{2}}(:,7:9));
+     s=UV(D.Seg.R{list{jPt}{3}}(:,4:6));
+     y=UV(cross(z,s));
+     x=cross(z,y);
+   elseif  strcmp(name,'LSHD');    
+     z=UV(D.Seg.R{list{jPt}{2}}(:,7:9));
+     s=UV(D.Seg.R{list{jPt}{3}}(:,4:6));
+     y=UV(cross(z,s));
+     x=cross(z,y);    
+   elseif  strcmp(name,'NECK');    
+     z=UV(D.Seg.R{list{jPt}{2}}(:,7:9));
+     s=UV(D.Seg.R{list{jPt}{3}}(:,4:6));
+     y=UV(cross(z,s));
+     x=cross(z,y);
+   else 
+     z=D.Seg.R{list{jPt}{2}}(:,7:9);
+     s=D.Seg.R{list{jPt}{3}}(:,1:3);
+     y=UV(cross(z,s));
+     x=cross(z,y);
+   end 
+
+      D.pt.jt{nSg}=[x y z];
+   
+  end  
+     
+     
+     
+     
+     
+     
+     
+     
+     
+return
